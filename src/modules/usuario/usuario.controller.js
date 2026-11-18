@@ -1,9 +1,20 @@
 import { UserModel } from "./usuario.model.js";
 
 export const obtenerUsuarios = async (req, res) => {
+  const { page = "1", limit = "10" } = req.query;
+  const pagina = Number(page);
+  const limite = Number(limit);
   try {
-    const results = await UserModel.findALL();
-    res.json({ results }); // serializa la respuesta en json
+    const { results, total } = await UserModel.findALL(pagina, limite);
+    res.json({
+      results,
+      pagination: {
+        page: pagina,
+        limit: limite,
+        total,
+        totalPages: Math.ceil(total / limite),
+      },
+    });
   } catch (error) {
     res.status(500).json({
       status: "error",
@@ -33,6 +44,7 @@ export const crearUsuario = async (req, res) => {
     estado: req.body.estado,
     password: req.body.password,
   };
+  console.log(datos);
   try {
     const results = await UserModel.create(datos);
     res.json({ results });
